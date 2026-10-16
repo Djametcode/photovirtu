@@ -1,0 +1,43 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+# Runtime slot database + uploaded images (local development only; production uses managed SQL)
+server/data/*.sqlite
+server/data/*.sqlite-wal
+server/data/*.sqlite-shm
+!server/data/.gitkeep
+
+# Environment files: .env.example is the committed template, the rest is local
+.env
+.env.*
+!.env.example
+
+# AI assistant tooling: installed skill packs and IDE state are machine-local.
+# (Project config such as opencode.json / .opencode/agent stays trackable.)
+.kiro/
+.opencode/skills/
+.opencode/node_modules/
+.opencode/logs/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~

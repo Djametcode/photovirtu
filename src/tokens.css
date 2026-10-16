@@ -1,0 +1,211 @@
+/* =====================================================================
+   photovirtu design tokens
+   ---------------------------------------------------------------------
+   Direction: "Vibrant & Block-based" structure + Aurora mesh gradients.
+   Block layout, large type (32px+), 48px+ section gaps, 200-300ms motion,
+   scroll-snap carousels, soft elevation instead of hard offset shadows.
+
+   Every ink/surface pair below was checked against WCAG AA for the size it
+   is used at (4.5:1 body, 3:1 large display). Footnotes carry the ratio.
+   ===================================================================== */
+
+:root {
+  /* --- brand hues --------------------------------------------------- */
+  --pv-rose: #e11d48;
+  --pv-rose-deep: #be123c;
+  --pv-fuchsia: #c026d3;
+  --pv-fuchsia-deep: #a21caf;
+  --pv-violet: #7c3aed;
+  --pv-violet-deep: #6d28d9;
+  --pv-blue: #2563eb;
+  --pv-cyan: #06b6d4;
+  --pv-amber: #f59e0b;
+  --pv-emerald: #10b981;
+
+  /* Signature gradient. White text clears AA on every stop:
+     #E11D48 4.70:1 · #C026D3 4.71:1 · #7C3AED 5.70:1 */
+  --pv-grad: linear-gradient(100deg, #e11d48 0%, #c026d3 52%, #7c3aed 100%);
+  --pv-grad-hover: linear-gradient(100deg, #be123c 0%, #a21caf 52%, #6d28d9 100%);
+  --pv-grad-soft: linear-gradient(100deg, #ffe1ea 0%, #f8e2ff 48%, #e7e0ff 100%);
+  --pv-grad-cool: linear-gradient(100deg, #2563eb 0%, #06b6d4 100%);
+
+  /* --- surfaces ----------------------------------------------------- */
+  --pv-bg: #fff5f8;
+  --pv-bg-2: #f7f2ff;
+  --pv-surface: #ffffff;
+  --pv-surface-tint: #fff0f5;
+  --pv-border: #f6d9e4;
+  --pv-border-strong: #f3c4d8;
+
+  /* --- ink (ratios measured on --pv-bg) ----------------------------- */
+  --pv-ink: #3b0a2a;   /* 15.6:1 — headings */
+  --pv-ink-2: #6b4a5e; /*  7.1:1 — body copy */
+  --pv-ink-3: #755f6e; /*  6.0:1 — meta, still AA for small text */
+  --pv-on-grad: #ffffff;
+
+  /* --- semantic ----------------------------------------------------- */
+  --pv-danger: #dc2626;
+  --pv-danger-ink: #991b1b;
+  --pv-danger-bg: #fef2f2;
+  --pv-danger-line: #fecaca;
+  --pv-success: #15803d;
+  --pv-success-bg: #dcfce7;
+
+  /* --- radii -------------------------------------------------------- */
+  --pv-r-xs: 10px;
+  --pv-r-sm: 14px;
+  --pv-r-md: 18px;
+  --pv-r-lg: 24px;
+  --pv-r-xl: 34px;
+  --pv-r-pill: 999px;
+
+  /* --- elevation (soft, layered — no hard offsets) ------------------ */
+  --pv-shadow-xs: 0 1px 2px rgba(59, 10, 42, .05), 0 1px 6px rgba(59, 10, 42, .04);
+  --pv-shadow-sm: 0 2px 8px rgba(59, 10, 42, .06), 0 8px 20px rgba(59, 10, 42, .06);
+  --pv-shadow-md: 0 8px 20px rgba(59, 10, 42, .08), 0 20px 48px rgba(59, 10, 42, .10);
+  --pv-shadow-lg: 0 14px 36px rgba(59, 10, 42, .12), 0 40px 80px rgba(59, 10, 42, .14);
+  --pv-shadow-rose: 0 10px 28px rgba(225, 29, 72, .30);
+  --pv-shadow-violet: 0 10px 28px rgba(124, 58, 237, .30);
+
+  /* --- block rhythm ------------------------------------------------- */
+  --pv-gutter: 24px;
+  /* Edge inset = the gutter, or the notch inset when it is bigger. */
+  --pv-edge: max(var(--pv-gutter), env(safe-area-inset-left, 0px));
+  --pv-max: 1160px;
+  --pv-block: 56px;
+
+  /* --- type --------------------------------------------------------- */
+  --pv-display: 'Righteous', system-ui, sans-serif;
+  --pv-body: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --pv-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* --- motion ------------------------------------------------------- */
+  --pv-ease: cubic-bezier(.22, 1, .36, 1);
+  --pv-fast: 180ms;
+  --pv-mid: 260ms;
+  --pv-slow: 380ms;
+}
+
+/* Shared shell: one soft aurora wash used behind the light pages. */
+.pv-aurora {
+  background:
+    radial-gradient(46% 38% at 8% 4%, rgba(225, 29, 72, .13), transparent 62%),
+    radial-gradient(44% 40% at 94% 8%, rgba(37, 99, 235, .12), transparent 64%),
+    radial-gradient(50% 44% at 80% 96%, rgba(124, 58, 237, .14), transparent 62%),
+    radial-gradient(42% 38% at 14% 92%, rgba(6, 182, 212, .11), transparent 64%),
+    linear-gradient(180deg, var(--pv-bg) 0%, #fff8fb 42%, var(--pv-bg-2) 100%);
+}
+
+/* Frosted surface for the sticky nav and floating chips. */
+.pv-glass {
+  background: rgba(255, 251, 253, .74);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+}
+
+.pv-grad-text {
+  background: var(--pv-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Compact label that sits on top of a colour the theme owns (accent canvas,
+   gradients, live video). An opaque chip stays readable on any of them. */
+span.label-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--pv-r-pill);
+  background: #17061a;
+  padding: 6px 13px;
+  color: #fff;
+  white-space: nowrap;
+}
+.page-header > span.label-chip,
+.capture-header > span.label-chip { color: #fff; }
+
+/* --- Buttons: the one place the signature gradient is always visible --- */
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--pv-r-pill);
+  padding: 0 26px;
+  font-family: var(--pv-body);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  transition: transform var(--pv-mid) var(--pv-ease), box-shadow var(--pv-mid) var(--pv-ease),
+    background-color var(--pv-mid) var(--pv-ease), border-color var(--pv-mid) var(--pv-ease),
+    color var(--pv-mid) var(--pv-ease);
+}
+
+.primary-button {
+  border: 0;
+  background: var(--pv-grad);
+  color: var(--pv-on-grad);
+  box-shadow: var(--pv-shadow-rose);
+}
+.primary-button:hover {
+  background: var(--pv-grad-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(225, 29, 72, .36);
+}
+.primary-button:active { transform: translateY(0) scale(.985); box-shadow: var(--pv-shadow-xs); }
+.primary-button:disabled {
+  background: #efe7ee;
+  color: #6a5762;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.primary-button:disabled:hover,
+.primary-button:disabled:active { background: #efe7ee; transform: none; box-shadow: none; }
+
+.secondary-button {
+  border: 1.5px solid var(--pv-border-strong);
+  background: var(--pv-surface);
+  color: var(--pv-ink);
+  box-shadow: var(--pv-shadow-xs);
+}
+.secondary-button:hover {
+  border-color: var(--pv-violet);
+  color: var(--pv-violet);
+  transform: translateY(-2px);
+  box-shadow: var(--pv-shadow-sm);
+}
+.secondary-button:active { transform: translateY(0) scale(.985); }
+.secondary-button:disabled { color: #6a5762; border-color: #e6dbe4; box-shadow: none; cursor: not-allowed; transform: none; }
+
+.full-button { width: 100%; }
+
+/* --- Motion primitives ------------------------------------------- */
+@keyframes pv-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pv-float {
+  50% { transform: translateY(-12px); }
+}
+@keyframes pv-emerge {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pv-drift {
+  from { background-position: 0% 0%; }
+  to { background-position: 100% 100%; }
+}
+@keyframes pv-pulse {
+  50% { transform: scale(1.05); }
+}
+@keyframes pv-spin {
+  to { transform: rotate(360deg); }
+}
+
+.pv-rise {
+  animation: pv-rise .56s var(--pv-ease) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}

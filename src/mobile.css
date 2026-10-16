@@ -1,0 +1,231 @@
+/* Mobile layer. Loaded last so it wins over the base rules.
+   The phone is the primary device for a photobooth, so this file owns:
+   gutters, block rhythm, the template carousel, tile sizing, safe areas and
+   real touch targets. Horizontal overflow is clipped (not hidden) so the
+   sticky nav keeps working. */
+
+html, body { overflow-x: clip; }
+
+/* --- Camera permission / failure overlay ---
+   Shown when getUserMedia is denied, dismissed, or unavailable so the user gets
+   a clear message + retry instead of staring at a black tile. */
+.cam-block {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  background: #14061a;
+  color: #fff;
+  text-align: center;
+}
+.peer-tile .cam-block ~ .peer-name,
+.peer-tile:has(.cam-block) .peer-name,
+.peer-tile:has(.cam-block) .peer-scrim { display: none; }
+.cam-block-msg { margin: 0; max-width: 34ch; font-size: 14px; font-weight: 500; line-height: 1.55; }
+.cam-block-retry {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  border: 0;
+  border-radius: var(--pv-r-pill);
+  padding: 0 24px;
+  background: var(--pv-grad);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: var(--pv-shadow-rose);
+}
+
+@media (max-width: 640px) {
+  :root { --pv-gutter: 16px; }
+}
+
+/* --- Gutters + tap targets ---------------------------------------- */
+@media (max-width: 640px) {
+  .page-header, .capture-header, .room-header { padding-top: 12px; padding-bottom: 12px; }
+  .page-header button, .page-header a, .capture-header button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-left: -4px;
+    padding: 0 10px;
+  }
+  .nav-action { min-height: 44px; display: inline-flex; align-items: center; }
+}
+
+/* --- HOME ---------------------------------------------------------- */
+@media (max-width: 640px) {
+  .hero { padding-top: 22px; }
+  .hero h1 { font-size: clamp(40px, 12vw, 54px); }
+  .hero-description { margin-top: 18px; font-size: 15px; line-height: 1.62; }
+  .hero-buttons { margin-top: 26px; gap: 10px; }
+  .hero-buttons .primary-button, .hero-buttons .secondary-button { width: 100%; }
+  .hero-meta {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+    gap: 4px 16px;
+    margin-top: 24px;
+    font-size: 11.5px;
+  }
+  .hero-meta li + li::before { display: none; }
+  /* A narrower booth keeps the pair of strips compact on a phone. */
+  .booth { width: min(100%, 288px); }
+  .film { gap: 12px; margin-top: 26px; }
+  .film-frame { padding: 28px 16px 26px; }
+  .film-frame h3 { font-size: 16px; }
+  .film-frame p { font-size: 12.5px; }
+  .final-cta { padding: 30px 22px; border-radius: var(--pv-r-lg); }
+  .final-cta .cta-row { gap: 12px; }
+  .final-cta .primary-button, .final-cta .secondary-button { width: 100%; }
+  .site-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
+@media (max-width: 400px) {
+  .booth { width: min(100%, 256px); }
+  .hero-meta { font-size: 10.5px; }
+}
+
+/* --- PILOT + ADMIN cards ------------------------------------------- */
+@media (max-width: 560px) {
+  .checkout-card, .admin-shell { padding: 24px 20px; }
+  .checkout-card h1, .admin-shell h1 { font-size: clamp(28px, 8vw, 38px); }
+  .checkout-card .primary-button,
+  .admin-login .primary-button { width: 100%; justify-self: stretch; }
+  .admin-top { flex-wrap: wrap; }
+}
+
+/* --- LOBBY --------------------------------------------------------- */
+@media (max-width: 560px) {
+  .lobby-card { padding: 22px 18px; }
+  .lobby-card .primary-button { width: 100%; }
+  .lobby-tabs button { min-height: 48px; }
+}
+
+/* =====================================================================
+   1. Action before decoration.
+   Recap / preview cards used to be pushed above the form with order:-1, so
+   the first screen was a decorative photostrip and the controls sat below
+   the fold. Recaps now follow the choice they summarise.
+   ===================================================================== */
+@media (max-width: 900px) {
+  .setup-summary { position: static; }
+}
+
+/* 2. Compact recap: small poster next to its facts, CTA full width. */
+@media (max-width: 640px) {
+  .setup-summary, .lobby-preview {
+    display: grid;
+    grid-template-columns: 124px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px 16px;
+    padding: 16px;
+  }
+  .setup-summary > p, .lobby-preview > p { grid-column: 1 / -1; margin: 0; }
+  .setup-summary .summary-preview, .lobby-preview .summary-preview { max-width: none; margin: 0; padding: 6px; }
+  .setup-summary dl, .lobby-preview dl { margin: 0; }
+  .setup-summary dl div, .lobby-preview dl div { padding: 7px 0; }
+  .setup-summary .full-button { grid-column: 1 / -1; margin-top: 8px; }
+}
+
+/* =====================================================================
+   3. Template picker as an edge-to-edge snap carousel.
+   A 24-card grid is a five-screen scroll in two columns; one flick, one
+   decision is the mobile answer.
+   ===================================================================== */
+.template-scroll-hint { display: none; }
+
+@media (max-width: 640px) {
+  .template-scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 16px 0 0;
+    color: var(--pv-violet);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+  }
+
+  /* A scrolling track must not raise its grid parent's min-content width,
+     otherwise `1fr` refuses to shrink and the whole page shifts sideways. */
+  .setup-layout > section, .lobby-layout > section { min-width: 0; }
+
+  .template-grid {
+    min-width: 0;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 46%;
+    gap: 12px;
+    /* Bleed to the screen edges so a card is always half-visible next to
+       the active one — that peek is what tells people to swipe. */
+    margin: 16px -16px 0;
+    padding: 4px 16px 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline-start: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .template-grid::-webkit-scrollbar { display: none; }
+  .template-option { scroll-snap-align: start; }
+  /* Two clamped lines keep every card the same height in the track. */
+  .template-option > span {
+    display: -webkit-box;
+    min-height: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* Very small phones: a wider card so the strip preview stays readable. */
+@media (max-width: 380px) {
+  .template-grid { grid-auto-columns: 58%; }
+}
+
+/* =====================================================================
+   4. Video tiles stay human-sized: 1-2 people get full-width tiles, 3-4
+   collapse to a 2x2 grid instead of four stacked screens.
+   ===================================================================== */
+@media (max-width: 560px) {
+  .peer-grid, .peer-grid.count-2, .peer-grid.count-3 { grid-template-columns: 1fr; }
+  .peer-grid.count-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .peer-name { bottom: 8px; left: 8px; padding: 4px 9px; font-size: 11px; }
+}
+
+/* =====================================================================
+   5. Safe areas. env() is 0 in a normal browser tab, so this only bites
+   when the page is installed or rotated on a notched device. The nav and the
+   home sections already fold the notch into --pv-edge; the page headers pick
+   it up here.
+   ===================================================================== */
+.page-header, .capture-header, .room-header {
+  padding-left: max(var(--pv-gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--pv-gutter), env(safe-area-inset-right, 0px));
+}
+.lobby-page, .setup-page, .result-page, .capture-page, .room-page, .admin-page {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* 6. Touch targets: keep the last few pills at/above the 24px minimum. */
+@media (max-width: 900px) {
+  .roster-kick { min-height: 32px; padding: 5px 13px; }
+}
+
+/* =====================================================================
+   7. Result screen: the composed strip is a tall artefact, so on phones the
+   summary + download CTA come first and the strip reads below it.
+   ===================================================================== */
+@media (max-width: 900px) {
+  .result-actions { order: -1; }
+}
+
+/* Stop iOS from inflating text after an orientation change. */
+html { -webkit-text-size-adjust: 100%; }

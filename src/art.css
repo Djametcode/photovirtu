@@ -1,0 +1,246 @@
+/* =====================================================================
+   Artwork: hero illustration + the photostrip system
+   ---------------------------------------------------------------------
+   Everything here is drawn with CSS/SVG — no bitmap assets. The photostrip
+   is one shared "modern frame" language driven by custom properties, so the
+   24 templates differ by hue, accent and texture rather than by 24 one-off
+   border/shadow recipes.
+
+   The strip is a container (`container-type: inline-size`), so the same markup
+   renders as a 120px thumbnail inside the setup carousel and as a 600px print
+   sheet without any size-specific font overrides.
+   ===================================================================== */
+
+/* ------------------------------------------------------------------ */
+/* HERO ARTWORK — the booth: a single strip slides out of the slot      */
+/* ------------------------------------------------------------------ */
+.booth {
+  position: relative;
+  width: min(100%, 380px);
+  margin: clamp(32px, 3.8vw, 46px) auto 0;
+  padding-top: 22px;
+  isolation: isolate;
+}
+.booth-glow {
+  position: absolute;
+  z-index: -1;
+  inset: 2% -42% 8%;
+  border-radius: 50%;
+  background: conic-gradient(from 200deg, #e11d48, #c026d3, #7c3aed, #2563eb, #06b6d4, #e11d48);
+  filter: blur(58px);
+  opacity: .32;
+  animation: pv-spin 44s linear infinite;
+}
+/* The dispenser mouth the strip slides out of. */
+.booth-slot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  width: 78%;
+  height: 30px;
+  border-radius: 14px 14px 8px 8px;
+  background: linear-gradient(180deg, #17071f 0%, #2a0f33 52%, #0d0413 100%);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, .72), 0 12px 26px rgba(59, 10, 42, .3);
+  transform: translateX(-50%);
+}
+.booth-strip {
+  position: relative;
+  margin-top: -12px;
+  padding: 9px;
+  border-radius: var(--pv-r-sm);
+  background: var(--pv-grad);
+  box-shadow: var(--pv-shadow-lg), var(--pv-shadow-rose);
+  animation: pv-emerge 1s var(--pv-ease) both;
+}
+.booth-strip .photostrip { border-radius: 10px; box-shadow: none; }
+
+/* ------------------------------------------------------------------ */
+/* PHOTOSTRIP — shared modern frame                                    */
+/* ------------------------------------------------------------------ */
+.photostrip {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4%;
+  padding: 5%;
+  overflow: hidden;
+  border-radius: var(--pv-r-md);
+  container-type: inline-size;
+  isolation: isolate;
+  box-shadow: var(--pv-shadow-md);
+}
+
+/* Per-template texture layer. Frames only set --pv-deco / -size / -alpha. */
+.photostrip::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--pv-deco, none);
+  background-size: var(--pv-deco-size, auto);
+  content: '';
+  opacity: var(--pv-deco-a, .55);
+  pointer-events: none;
+}
+
+.strip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+/* The title is a label on top of artwork whose hue the template owns, so it
+   carries its own dark scrim — the same rule the badges use. White on
+   rgba(10,3,17,.72) over any canvas clears AA (worst case ≈ 8:1). */
+.strip-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  margin-bottom: 5%;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: var(--pv-r-pill);
+  padding: .5em .7em;
+  background: rgba(10, 3, 17, .72);
+  color: #fff;
+  font-family: var(--pv-display);
+  font-weight: 400;
+  font-size: 12px;
+  font-size: 4.4cqw;
+  letter-spacing: .01em;
+  line-height: 1.08;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.strip-title strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.strip-title span { flex: none; }
+/* Thumbnails: drop the decorative glyph and tighten the pill so the template
+   name survives at 120px wide. */
+.photostrip.compact .strip-title span { display: none; }
+.photostrip.compact .strip-title { font-size: 4.1cqw; padding: .45em .62em; }
+.photostrip.compact .photo-slot { aspect-ratio: 1.42; }
+
+.photo-slot {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1.38;
+  margin-top: 4%;
+  border-radius: var(--pv-r-xs);
+  background: linear-gradient(150deg, #2c1233 0%, #170710 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .24), 0 4px 14px rgba(10, 2, 20, .3);
+}
+.photo-slot img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Slim marker bar on the right edge of every frame. */
+.photo-slot em {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  width: 11%;
+  height: 100%;
+  place-items: center;
+  border-left: 2px solid var(--pv-accent, #fff);
+  background: rgba(9, 3, 16, .74);
+  color: #fff;
+  font-size: 6px;
+  font-size: 2.3cqw;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: .16em;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.slot-placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  /* Centre inside the area the accent marker bar leaves free. */
+  padding-right: 11%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #fff;
+}
+.slot-placeholder span {
+  font-size: 9px;
+  font-size: 3.5cqw;
+  font-weight: 600;
+  letter-spacing: .2em;
+  opacity: .82;
+}
+.slot-placeholder b {
+  font-family: var(--pv-display);
+  font-size: 30px;
+  font-size: 12cqw;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.strip-footer {
+  margin-top: 5%;
+  border-top: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  padding-top: 3.5%;
+  font-family: var(--pv-mono);
+  font-size: 7px;
+  font-size: 2.7cqw;
+  letter-spacing: .12em;
+  text-align: center;
+}
+
+/* Comic shout-badge for the Web Rush frame (kept from the original idea). */
+.comic-beat {
+  position: absolute;
+  top: 7%;
+  left: 5%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: var(--pv-r-pill);
+  padding: .3em .7em;
+  background: #ffd400;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .28);
+  color: #7a1020;
+  font-size: 8px;
+  font-size: 3.4cqw;
+  font-weight: 700;
+  letter-spacing: .02em;
+  transform: rotate(-7deg);
+}
+
+/* Thumbnails in the picker / recap: same language, tighter padding. */
+.photostrip.compact { padding: 5.5%; gap: 4.5%; }
+
+/* ------------------------------------------------------------------ */
+/* PER-TEMPLATE IDENTITY                                               */
+/* Only texture + title tint change; the frame geometry is shared.      */
+/* ------------------------------------------------------------------ */
+.frame-web-rush { --pv-deco: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, .16) 0 6deg, transparent 6deg 16deg); --pv-deco-size: 70% 70%; --pv-deco-a: .5; }
+.frame-cyber-arcade { --pv-deco: linear-gradient(rgba(255, 255, 255, .17) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .17) 1px, transparent 1px); --pv-deco-size: 9% 9%; --pv-deco-a: .7; }
+.frame-cosmic-club { --pv-deco: radial-gradient(circle, rgba(255, 255, 255, .5) 0 1px, transparent 1.6px), radial-gradient(circle, rgba(255, 255, 255, .32) 0 1px, transparent 1.6px); --pv-deco-size: 13% 13%, 21% 21%; --pv-deco-a: .6; }
+.frame-cherry-racing { --pv-deco: conic-gradient(rgba(255, 255, 255, .22) 25%, transparent 0 50%, rgba(255, 255, 255, .22) 0 75%, transparent 0); --pv-deco-size: 11% 11%; --pv-deco-a: .5; }
+.frame-pixel-pop { --pv-deco: linear-gradient(rgba(255, 255, 255, .14) 1px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, .14) 2px, transparent 3px); --pv-deco-size: 6% 6%; --pv-deco-a: .8; }
+.frame-neon-tokyo { --pv-deco: repeating-linear-gradient(90deg, rgba(255, 255, 255, .12) 0 1px, transparent 1px 14%); --pv-deco-size: auto; --pv-deco-a: .6; }
+.frame-glitch-aesthetic { --pv-deco: repeating-linear-gradient(0deg, rgba(255, 255, 255, .07) 0 1px, transparent 1px 4px); --pv-deco-size: auto; --pv-deco-a: .9; }
+.frame-y2k-chrome { --pv-deco: radial-gradient(circle at 20% 20%, #fff 0 2px, transparent 3px), radial-gradient(circle at 76% 62%, rgba(255, 255, 255, .8) 0 2.5px, transparent 3.5px); --pv-deco-size: 22% 22%, 30% 30%; --pv-deco-a: .75; }
+.frame-disco-fever { --pv-deco: radial-gradient(circle, rgba(255, 255, 255, .5) 0 1px, transparent 1.7px); --pv-deco-size: 9% 9%; --pv-deco-a: .7; }
+.frame-flower-power { --pv-deco: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .85) 0 13%, transparent 14%), radial-gradient(circle at 50% 12%, rgba(255, 255, 255, .55) 0 15%, transparent 16%), radial-gradient(circle at 88% 50%, rgba(255, 255, 255, .55) 0 15%, transparent 16%), radial-gradient(circle at 50% 88%, rgba(255, 255, 255, .55) 0 15%, transparent 16%), radial-gradient(circle at 12% 50%, rgba(255, 255, 255, .55) 0 15%, transparent 16%); --pv-deco-size: 26% 26%; --pv-deco-a: .55; }
+.frame-tropical-pop { --pv-deco: radial-gradient(ellipse at 0 100%, transparent 0 44%, rgba(255, 255, 255, .3) 45% 52%, transparent 53%), radial-gradient(ellipse at 100% 0, transparent 0 44%, rgba(255, 255, 255, .3) 45% 52%, transparent 53%); --pv-deco-size: 30% 30%; --pv-deco-a: .6; }
+.frame-bubblegum { --pv-deco: radial-gradient(circle at 22% 24%, #fff 0 3px, transparent 4px), radial-gradient(circle at 72% 68%, #fff 0 4px, transparent 5px), radial-gradient(circle at 46% 90%, #fff 0 2.5px, transparent 3.5px); --pv-deco-size: 24% 24%, 34% 34%, 27% 27%; --pv-deco-a: .7; }
+.frame-black-film { --pv-deco: repeating-linear-gradient(90deg, rgba(255, 255, 255, .12) 0 3px, transparent 3px 9%); --pv-deco-size: auto; --pv-deco-a: .5; }
+.frame-scrapbook-club { --pv-deco: repeating-linear-gradient(17deg, rgba(37, 50, 74, .1) 0 1px, transparent 1px 9px); --pv-deco-size: auto; --pv-deco-a: .9; }
+.frame-future-medieval { --pv-deco: repeating-linear-gradient(45deg, rgba(255, 255, 255, .07) 0 2px, transparent 2px 11px), radial-gradient(circle at 50% 40%, transparent 0 34%, rgba(255, 255, 255, .16) 35% 36%, transparent 37%); --pv-deco-size: auto, 30% 30%; --pv-deco-a: .8; }
+.frame-neon-noir { --pv-deco: repeating-linear-gradient(115deg, rgba(255, 255, 255, .09) 0 1px, transparent 1px 22px); --pv-deco-size: auto; --pv-deco-a: .9; }
+.frame-denim-cloud { --pv-deco: radial-gradient(ellipse at 22% 16%, rgba(255, 255, 255, .72) 0 9%, transparent 10%), radial-gradient(ellipse at 78% 74%, rgba(255, 255, 255, .6) 0 11%, transparent 12%), repeating-linear-gradient(90deg, transparent 0 12px, rgba(19, 54, 93, .12) 12px 13px); --pv-deco-size: 34% 28%, 40% 32%, 9% 9%; --pv-deco-a: .8; }
+.frame-citrus-studio { --pv-deco: radial-gradient(circle at 18% 18%, rgba(255, 255, 255, .5) 0 8%, transparent 9%), repeating-conic-gradient(from 45deg, rgba(255, 255, 255, .13) 0 10deg, transparent 10deg 24deg); --pv-deco-size: 32% 32%, 22% 22%; --pv-deco-a: .8; }
+.frame-punk-zine { --pv-deco: repeating-linear-gradient(0deg, rgba(18, 18, 18, .07) 0 1px, transparent 1px 4px); --pv-deco-size: auto; --pv-deco-a: .9; }
+.frame-film-grain { --pv-deco: repeating-conic-gradient(rgba(255, 255, 255, .045) 0 90deg, transparent 90deg 180deg), repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, .03) 2px, rgba(255, 255, 255, .03) 3px); --pv-deco-size: 7% 7%, auto; --pv-deco-a: .9; }
+.frame-sage-botanical { --pv-deco: radial-gradient(ellipse at 12% 84%, transparent 0 45%, rgba(212, 131, 143, .5) 46% 53%, transparent 54%), repeating-linear-gradient(135deg, transparent 0 18px, rgba(43, 74, 62, .07) 18px 19px); --pv-deco-size: 42% 42%, 13% 13%; --pv-deco-a: .8; }
+.frame-vinyl-express { --pv-deco: repeating-radial-gradient(circle at 50% 50%, transparent 0 7px, rgba(74, 53, 37, .05) 8px 9px); --pv-deco-size: 20% 20%; --pv-deco-a: .9; }
+
+/* Templates whose canvas is light no longer need a different title chip: the
+   title carries its own dark scrim on every template (see .strip-title). */
