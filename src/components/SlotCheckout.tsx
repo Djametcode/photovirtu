@@ -234,7 +234,7 @@ export function SlotCheckout({ template, capacity, initialName = '', payment, ma
           </div>
           <label className="checkout-upload" htmlFor="slot-proof">
             <b>{proofPreview ? 'Ganti bukti transfer' : 'Unggah bukti transfer'}</b>
-            <span>Screenshot atau foto m-banking, maks {Math.round(maxProofBytes / 1024)} KB.</span>
+            <span>Screenshot atau foto m-banking. Foto besar otomatis dikompres.</span>
           </label>
           <input id="slot-proof" className="checkout-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" disabled={busy} onChange={(event) => void sendProof(event.target.files?.[0])} />
           {proofPreview && <img className="checkout-proof-preview" src={proofPreview} alt="Pratinjau bukti transfer" />}

@@ -165,18 +165,69 @@ export function formatMoney(amount: number, currency = 'IDR') {
 }
 
 // Shared by the checkout proof upload and the admin QRIS upload: read the file
-// in the browser and refuse anything the server would reject anyway.
+// in the browser. Oversized photos (phone screenshots are routinely 1.5-4 MB)
+// are downscaled and re-encoded through a canvas instead of rejected: the
+// server cap only ever sees post-compression bytes, so the payer never has to
+// compress anything by hand. Only files the canvas cannot handle fall back to
+// the strict size check.
+const MAX_CANVAS_DIMENSION = 1600
+
 export async function readImageAsDataUrl(file: File, maxBytes: number) {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type)) throw new Error('BAD_IMAGE_TYPE')
-  if (file.size > maxBytes) throw new Error('IMAGE_TOO_LARGE')
-  const buffer = await file.arrayBuffer()
-  if (buffer.byteLength > maxBytes) throw new Error('IMAGE_TOO_LARGE')
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  for (let index = 0; index < bytes.length; index += 0x8000) {
-    binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000))
+  if (file.size <= maxBytes) {
+    // Small enough as-is: skip the canvas entirely to keep EXIF and quality.
+    const buffer = await file.arrayBuffer()
+    if (buffer.byteLength > maxBytes) throw new Error('IMAGE_TOO_LARGE')
+    const bytes = new Uint8Array(buffer)
+    let smallBinary = ''
+    for (let index = 0; index < bytes.length; index += 0x8000) {
+      smallBinary += String.fromCharCode(...bytes.subarray(index, index + 0x8000))
+    }
+    return `data:${file.type};base64,${btoa(smallBinary)}`
   }
-  return `data:${file.type};base64,${btoa(binary)}`
+
+  const compressed = await compressImageThroughCanvas(file, maxBytes)
+  if (compressed) return compressed
+  throw new Error('IMAGE_TOO_LARGE')
+}
+
+// Draw the image into a canvas scaled to fit MAX_CANVAS_DIMENSION, then
+// re-encode as JPEG/webp with a quality ladder until the result fits maxBytes.
+async function compressImageThroughCanvas(file: File, maxBytes: number) {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, MAX_CANVAS_DIMENSION / Math.max(bitmap.width, bitmap.height))
+    const width = Math.max(1, Math.round(bitmap.width * scale))
+    const height = Math.max(1, Math.round(bitmap.height * scale))
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+    ctx.drawImage(bitmap, 0, 0, width, height)
+    bitmap.close()
+
+    const types = file.type === 'image/png' || file.type === 'image/webp'
+      ? ['image/webp', 'image/jpeg']
+      : ['image/jpeg']
+    for (const type of types) {
+      for (const quality of [0.85, 0.7, 0.55, 0.4]) {
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality))
+        if (blob && blob.size <= maxBytes) {
+          const bytes = new Uint8Array(await blob.arrayBuffer())
+          let binary = ''
+          for (let index = 0; index < bytes.length; index += 0x8000) {
+            binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000))
+          }
+          return `data:${type};base64,${btoa(binary)}`
+        }
+      }
+    }
+  } catch {
+    // createImageBitmap or toBlob failed (unsupported format, memory); fall
+    // through to the size rejection so the user still gets a clear error.
+  }
+  return null
 }
 
 export function slotErrorMessage(error: unknown) {
